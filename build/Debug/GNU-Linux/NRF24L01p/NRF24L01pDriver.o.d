@@ -1,0 +1,9 @@
+build/Debug/GNU-Linux/NRF24L01p/NRF24L01pDriver.o: \
+ NRF24L01p/NRF24L01pDriver.cpp NRF24L01p/NRF24L01pDriver.h \
+ NRF24L01p/port/NRF24L01pPort.h NRF24L01p/NRF24L01pRegisters.h
+
+NRF24L01p/NRF24L01pDriver.h:
+
+NRF24L01p/port/NRF24L01pPort.h:
+
+NRF24L01p/NRF24L01pRegisters.h:

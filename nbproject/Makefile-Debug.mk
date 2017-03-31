@@ -35,6 +35,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/NRF24L01p/NRF24L01p.o \
+	${OBJECTDIR}/NRF24L01p/NRF24L01pDriver.o \
+	${OBJECTDIR}/NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.o \
+	${OBJECTDIR}/NRF24L01p/port/mbed/NRF24L01pPort.o \
+	${OBJECTDIR}/NRF24L01p/port/stm32/NRF24L01pPort.o \
 	${OBJECTDIR}/main.o
 
 
@@ -61,6 +66,31 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/feynman: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/feynman ${OBJECTFILES} ${LDLIBSOPTIONS} -lwiringPi -lpthread -lrt -lpaho-mqtt3c
+
+${OBJECTDIR}/NRF24L01p/NRF24L01p.o: NRF24L01p/NRF24L01p.cpp
+	${MKDIR} -p ${OBJECTDIR}/NRF24L01p
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NRF24L01p/NRF24L01p.o NRF24L01p/NRF24L01p.cpp
+
+${OBJECTDIR}/NRF24L01p/NRF24L01pDriver.o: NRF24L01p/NRF24L01pDriver.cpp
+	${MKDIR} -p ${OBJECTDIR}/NRF24L01p
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NRF24L01p/NRF24L01pDriver.o NRF24L01p/NRF24L01pDriver.cpp
+
+${OBJECTDIR}/NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.o: NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.cpp
+	${MKDIR} -p ${OBJECTDIR}/NRF24L01p/port/RPI_WiringPi
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.o NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.cpp
+
+${OBJECTDIR}/NRF24L01p/port/mbed/NRF24L01pPort.o: NRF24L01p/port/mbed/NRF24L01pPort.cpp
+	${MKDIR} -p ${OBJECTDIR}/NRF24L01p/port/mbed
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NRF24L01p/port/mbed/NRF24L01pPort.o NRF24L01p/port/mbed/NRF24L01pPort.cpp
+
+${OBJECTDIR}/NRF24L01p/port/stm32/NRF24L01pPort.o: NRF24L01p/port/stm32/NRF24L01pPort.cpp
+	${MKDIR} -p ${OBJECTDIR}/NRF24L01p/port/stm32
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NRF24L01p/port/stm32/NRF24L01pPort.o NRF24L01p/port/stm32/NRF24L01pPort.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

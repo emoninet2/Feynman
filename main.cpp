@@ -29,6 +29,9 @@
 #include "MQTTClient.h"
 #include "MQTTClientPersistence.h"
 
+#include "NRF24L01p/NRF24L01p.h"
+
+
 
 #define ADDRESS     "tcp://localhost:1883"
 #define CLIENTID    "Feynman"
@@ -38,10 +41,11 @@
 #define TIMEOUT     10000L
 
 pthread_t thread1;
-
-
+pthread_t thread2;
 
 volatile MQTTClient_deliveryToken deliveredtoken;
+
+
 
 typedef struct{
     MQTTClient client;
@@ -51,6 +55,56 @@ typedef struct{
 }MQTTClientData_t;
 
 MQTTClientData_t myClient;
+
+
+
+
+NRF24L01p Radio;
+NRF24L01p::RadioConfig_t RadioConfig;
+NRF24L01p::RxPipeConfig_t RxPipeConfig[6];
+
+void NRF24L01p_RadioReset(){
+
+    RadioConfig.DataReadyInterruptEnabled = 0;
+    RadioConfig.DataSentInterruptFlagEnabled = 0;
+    RadioConfig.MaxRetryInterruptFlagEnabled = 0;
+    RadioConfig.Crc = NRF24L01p::CONFIG_CRC_16BIT;
+    RadioConfig.AutoReTransmissionCount = 15;
+    RadioConfig.AutoReTransmitDelayX250us = 15;
+    RadioConfig.frequencyOffset = 2;
+    RadioConfig.datarate = NRF24L01p::RF_SETUP_RF_DR_2MBPS;
+    RadioConfig.RfPower = NRF24L01p::RF_SETUP_RF_PWR_0DBM;
+    RadioConfig.PllLock = 0;
+    RadioConfig.ContWaveEnabled = 0;
+    RadioConfig.FeatureDynamicPayloadEnabled = 1;
+    RadioConfig.FeaturePayloadWithAckEnabled = 1;
+    RadioConfig.FeatureDynamicPayloadWithNoAckEnabled = 1;
+
+
+    RxPipeConfig[0].address = 0xAABBCCDDEE;
+    RxPipeConfig[1].address = 0x6565656501;
+    RxPipeConfig[2].address = 0x6565656502;
+    RxPipeConfig[3].address = 0x6565656503;
+    RxPipeConfig[4].address = 0x6565656509;
+    RxPipeConfig[5].address = 0x6565656505;
+ 
+    int i;
+    for(i=0;i<6;i++){
+        RxPipeConfig[i].PipeEnabled = 1;
+        RxPipeConfig[i].autoAckEnabled = 1;
+        RxPipeConfig[i].dynamicPayloadEnabled = 1;
+    }
+        
+        
+    Radio.ResetConfigValues(&RadioConfig, RxPipeConfig);
+}
+
+
+
+
+
+
+
 
 void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *message){
     
@@ -149,12 +203,43 @@ void *mqtt_thread(void *ptr){
     MQTTClient_destroy(&myClient.client);
 }
 
+
+
+void *nrf24l01p_thread(void *ptr){
+    printf("RX NODE\r\n");
+    NRF24L01p_RadioReset();
+
+    
+    int i;
+    char myMesg[32];
+    NRF24L01p::Payload_t payload;
+    
+    payload.UseAck = 1;
+    payload.address = 0x11223344EE;
+    payload.data = (uint8_t*)myMesg;
+    payload.length = strlen(myMesg);
+    payload.retransmitCount = 15;
+    
+    sprintf((char*) payload.data, "light 2 1" );
+    payload.length = strlen((char*)payload.data);
+    Radio.TransmitPayload(&payload);
+    
+    while(1){
+
+    }
+
+
+}
+
+
+
 /*
  * 
  */
 int main(int argc, char** argv) {
     
     pthread_create(&thread1,NULL, mqtt_thread, (void*) NULL);
+    pthread_create(&thread2,NULL, nrf24l01p_thread, (void*) NULL);
 
     while(1){
 

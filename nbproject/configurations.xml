@@ -5,6 +5,33 @@
                    displayName="Header Files"
                    projectFiles="true">
     </logicalFolder>
+    <logicalFolder name="NRF24L01p" displayName="NRF24L01p" projectFiles="true">
+      <logicalFolder name="Examples" displayName="Examples" projectFiles="true">
+        <itemPath>NRF24L01p/Examples/PingPong.cpp</itemPath>
+        <itemPath>NRF24L01p/Examples/TxRx.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="port" displayName="port" projectFiles="true">
+        <logicalFolder name="mbed" displayName="mbed" projectFiles="true">
+          <itemPath>NRF24L01p/port/mbed/NRF24L01pPort.cpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="RPI_WiringPi"
+                       displayName="RPI_WiringPi"
+                       projectFiles="true">
+          <itemPath>NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.cpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="stm32" displayName="stm32" projectFiles="true">
+          <itemPath>NRF24L01p/port/stm32/NRF24L01pPort.cpp</itemPath>
+        </logicalFolder>
+        <itemPath>NRF24L01p/port/NRF24L01pPort.h</itemPath>
+        <itemPath>NRF24L01p/port/NRF24L01pPortConfig.h</itemPath>
+      </logicalFolder>
+      <itemPath>NRF24L01p/NRF24L01p.cpp</itemPath>
+      <itemPath>NRF24L01p/NRF24L01p.h</itemPath>
+      <itemPath>NRF24L01p/NRF24L01pConfig.h</itemPath>
+      <itemPath>NRF24L01p/NRF24L01pDriver.cpp</itemPath>
+      <itemPath>NRF24L01p/NRF24L01pDriver.h</itemPath>
+      <itemPath>NRF24L01p/NRF24L01pRegisters.h</itemPath>
+    </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
@@ -26,6 +53,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>NRF24L01p</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -42,6 +72,40 @@
           <commandLine>-lwiringPi -lpthread -lrt -lpaho-mqtt3c</commandLine>
         </linkerTool>
       </compileType>
+      <item path="NRF24L01p/NRF24L01p.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01p.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pRegisters.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/NRF24L01pPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/NRF24L01pPortConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/mbed/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/stm32/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
@@ -66,6 +130,44 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="NRF24L01p/Examples/PingPong.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/Examples/TxRx.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01p.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01p.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pConfig.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pDriver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pDriver.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/NRF24L01pRegisters.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/NRF24L01pPort.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/NRF24L01pPortConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/RPI_WiringPi/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/mbed/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="NRF24L01p/port/stm32/NRF24L01pPort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
