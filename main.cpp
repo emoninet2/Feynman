@@ -13,11 +13,15 @@
  */
 
 
+#include <iostream>
+#include <cstdlib>
+#include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <mqueue.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -42,6 +46,7 @@
 
 pthread_t thread1;
 pthread_t thread2;
+pthread_t thread3;
 
 volatile MQTTClient_deliveryToken deliveredtoken;
 
@@ -56,15 +61,15 @@ typedef struct{
 
 MQTTClientData_t myClient;
 
-
-
+NRF24L01p::Payload_t TxPayload;
+sem_t nrf24l01pTxMutex;
+uint8_t nrf24l01pTxBuffer[32];
 
 NRF24L01p Radio;
 NRF24L01p::RadioConfig_t RadioConfig;
 NRF24L01p::RxPipeConfig_t RxPipeConfig[6];
 
 void NRF24L01p_RadioReset(){
-
     RadioConfig.DataReadyInterruptEnabled = 0;
     RadioConfig.DataSentInterruptFlagEnabled = 0;
     RadioConfig.MaxRetryInterruptFlagEnabled = 0;
@@ -80,7 +85,6 @@ void NRF24L01p_RadioReset(){
     RadioConfig.FeaturePayloadWithAckEnabled = 1;
     RadioConfig.FeatureDynamicPayloadWithNoAckEnabled = 1;
 
-
     RxPipeConfig[0].address = 0xAABBCCDDEE;
     RxPipeConfig[1].address = 0x6565656501;
     RxPipeConfig[2].address = 0x6565656502;
@@ -95,32 +99,29 @@ void NRF24L01p_RadioReset(){
         RxPipeConfig[i].dynamicPayloadEnabled = 1;
     }
         
-        
     Radio.ResetConfigValues(&RadioConfig, RxPipeConfig);
 }
 
 
-
-
-
-
-
-
 void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *message){
-    
-    char buffer[message->payloadlen];
-    memcpy(buffer,message->payload, message->payloadlen);
-    buffer[message->payloadlen] = '\0';
 
-    
     if(!strcmp(topicName,"emon")){
         printf("the topic name is emon\r\n");
     }
-    else if(!strcmp(topicName,"subscribe")){
-        printf("the topic name is subscribe\r\n");
+    else if(!strcmp(topicName,"feynman/radio/nrf24/send")){
+        while(sem_wait(&nrf24l01pTxMutex));
+        if(message->payloadlen < 32){
+            TxPayload.length = message->payloadlen;
+            memcpy(TxPayload.data,message->payload, message->payloadlen);
+        }
+        sem_post(&nrf24l01pTxMutex);
     }
-    else if(!strcmp(topicName,"unsubscribe")){
-        printf("the topic name is unsubscribe\r\n");
+    else if(!strcmp(topicName,"feynman/radio/nrf24/txAddr")){
+        while(sem_wait(&nrf24l01pTxMutex));
+        uint64_t addr;
+        addr = strtoull((char*)message->payload , NULL, 16);
+        TxPayload.address = addr;
+        sem_post(&nrf24l01pTxMutex);
     }
 }
 
@@ -129,7 +130,6 @@ void connlost(void *context, char *cause)
     printf("\nConnection lost\n");
     printf("     cause: %s\n", cause);
 }
-
 
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
@@ -172,28 +172,27 @@ void *mqtt_thread(void *ptr){
     MQTTClient_setCallbacks(myClient.client, NULL, myClient.cl, myClient.ma, myClient.dc);
     
     
-    printf("do do \r\n");
     if ((rc = MQTTClient_connect(myClient.client, &conn_opts)) != MQTTCLIENT_SUCCESS)
     {
         printf("Failed to connect, return code %d\n", rc);
         exit(-1);
     }
     
-    pubmsg.payload = (void* )PAYLOAD;
-    pubmsg.payloadlen = strlen(PAYLOAD);
-    pubmsg.qos = QOS;
-    pubmsg.retained = 0;
-    MQTTClient_publishMessage(myClient.client, TOPIC, &pubmsg, &token);
-    printf("Waiting for up to %d seconds for publication of %s\n"
-            "on topic %s for client with ClientID: %s\n",
-            (int)(TIMEOUT/1000), PAYLOAD, TOPIC, CLIENTID);
-    rc = MQTTClient_waitForCompletion(myClient.client, token, TIMEOUT);
-    printf("Message with delivery token %d delivered\n", token);
+    //pubmsg.payload = (void* )PAYLOAD;
+    //pubmsg.payloadlen = strlen(PAYLOAD);
+    //pubmsg.qos = QOS;
+    //pubmsg.retained = 0;
+    //MQTTClient_publishMessage(myClient.client, TOPIC, &pubmsg, &token);
+    //printf("Waiting for up to %d seconds for publication of %s\n"
+    //        "on topic %s for client with ClientID: %s\n",
+    //        (int)(TIMEOUT/1000), PAYLOAD, TOPIC, CLIENTID);
+    //rc = MQTTClient_waitForCompletion(myClient.client, token, TIMEOUT);
+    //printf("Message with delivery token %d delivered\n", token);
     
      // MQTTClient_subscribe(client, TOPIC, QOS);
     MQTTClient_subscribe(myClient.client, "emon", QOS);
-    MQTTClient_subscribe(myClient.client, "feynman/radio/txAddr", QOS);
-    MQTTClient_subscribe(myClient.client, "feynman/radio/send/#", QOS);
+    MQTTClient_subscribe(myClient.client, "feynman/#", QOS);
+    //MQTTClient_subscribe(myClient.client, "feynman/radio/send/#", QOS);
     
     while(1){
 
@@ -210,27 +209,16 @@ void *nrf24l01p_thread(void *ptr){
     NRF24L01p_RadioReset();
 
     
-    int i;
-    char myMesg[32];
-    NRF24L01p::Payload_t payload;
-    
-    payload.UseAck = 1;
-    payload.address = 0x11223344EE;
-    payload.data = (uint8_t*)myMesg;
-    payload.length = strlen(myMesg);
-    payload.retransmitCount = 15;
-    
-    sprintf((char*) payload.data, "light 2 1" );
-    payload.length = strlen((char*)payload.data);
-    Radio.TransmitPayload(&payload);
-    
     while(1){
-
+        while(sem_wait(&nrf24l01pTxMutex));
+        if(*TxPayload.data != NULL){
+            printf("gonna send [%d] %s\r\n", TxPayload.length, TxPayload.data);
+            Radio.TransmitPayload(&TxPayload);
+            *TxPayload.data = NULL;
+        }
+        sem_post(&nrf24l01pTxMutex);
     }
-
-
 }
-
 
 
 /*
@@ -238,9 +226,15 @@ void *nrf24l01p_thread(void *ptr){
  */
 int main(int argc, char** argv) {
     
+    TxPayload.UseAck = 1;
+    TxPayload.address = 0x11223344EE;
+    TxPayload.data = nrf24l01pTxBuffer; 
+    *TxPayload.data = NULL;
+    
+    sem_init(&nrf24l01pTxMutex, 0, 1); // initialize mutex
     pthread_create(&thread1,NULL, mqtt_thread, (void*) NULL);
     pthread_create(&thread2,NULL, nrf24l01p_thread, (void*) NULL);
-
+    
     while(1){
 
     }
