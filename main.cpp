@@ -62,6 +62,7 @@ typedef struct{
 MQTTClientData_t myClient;
 
 NRF24L01p::Payload_t TxPayload;
+NRF24L01p::Payload_t RxPayload;
 sem_t nrf24l01pTxMutex;
 uint8_t nrf24l01pTxBuffer[32];
 
@@ -105,6 +106,7 @@ void NRF24L01p_RadioReset(){
 
 void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *message){
 
+    
     if(!strcmp(topicName,"emon")){
         printf("the topic name is emon\r\n");
     }
@@ -123,6 +125,25 @@ void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *mes
         TxPayload.address = addr;
         sem_post(&nrf24l01pTxMutex);
     }
+    else if(!strcmp(topicName,"feynman/penguin/send")){
+        while(sem_wait(&nrf24l01pTxMutex));
+        //if(message->payloadlen < 32){
+            TxPayload.address = 0x11223344ee;
+            TxPayload.length = message->payloadlen;
+            memcpy(TxPayload.data,message->payload, message->payloadlen);
+        //}
+        sem_post(&nrf24l01pTxMutex);
+    }
+    else if(!strcmp(topicName,"feynman/thebox/send")){
+        while(sem_wait(&nrf24l01pTxMutex));
+        //if(message->payloadlen < 32){
+            TxPayload.address = 0x1234567891;
+            TxPayload.length = message->payloadlen;
+            memcpy(TxPayload.data,message->payload, message->payloadlen);
+        //}
+        sem_post(&nrf24l01pTxMutex);
+    }
+
 }
 
 void connlost(void *context, char *cause)
@@ -133,10 +154,10 @@ void connlost(void *context, char *cause)
 
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
-    char buffer[message->payloadlen];
-    memcpy(buffer,message->payload, message->payloadlen);
-    buffer[message->payloadlen] = '\0';
-    printf("%s/%s\r\n", topicName, buffer);
+    //char buffer[message->payloadlen];
+    //memcpy(buffer,message->payload, message->payloadlen);
+    //buffer[message->payloadlen] = '\0';
+    //printf("%s/%s\r\n", topicName, buffer);
     
     process_mqtt_message(topicName, topicLen, message);
     
@@ -212,10 +233,38 @@ void *nrf24l01p_thread(void *ptr){
     while(1){
         while(sem_wait(&nrf24l01pTxMutex));
         if(*TxPayload.data != NULL){
-            printf("gonna send [%d] %s\r\n", TxPayload.length, TxPayload.data);
+            //printf("gonna send [%d] %s\r\n", TxPayload.length, TxPayload.data);
             Radio.TransmitPayload(&TxPayload);
             *TxPayload.data = NULL;
         }
+        
+        if(Radio.readable()){
+            uint8_t RxData[32];
+            RxPayload.data = RxData;
+
+            Radio.clear_data_ready_flag();
+            Radio.readPayload(&RxPayload);
+            RxPayload.data[RxPayload.length] = '\0';
+            printf("pipe %d : %s\r\n",RxPayload.pipe, RxPayload.data);
+            Radio.flush_rx();
+            
+                //MQTTClient client;
+            MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+            MQTTClient_message pubmsg = MQTTClient_message_initializer;
+            MQTTClient_deliveryToken token;
+           
+            pubmsg.payload = (void* )RxPayload.data;
+            pubmsg.payloadlen = RxPayload.length;
+            pubmsg.qos = QOS;
+            pubmsg.retained = 0;
+            if(RxPayload.pipe == 1){
+                MQTTClient_publishMessage(myClient.client, "feynman/penguin/send", &pubmsg, &token);
+            }
+            
+
+    }
+        
+        
         sem_post(&nrf24l01pTxMutex);
     }
 }
