@@ -8,7 +8,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/main.cpp</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/port/RPI%5F%57%69%72%69%6E%67%50%69%2F%4E%52%46%32%34%4C%30%31%70%50%6F%72%74%2E%63%70%70</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01pConfig.h</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01p.h</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/Examples/TxRx.cpp</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/port/NRF24L01pPortConfig.h</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01pDriver.h</file>
+            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01p.cpp</file>
         </group>
     </open-files>
 </project-private>

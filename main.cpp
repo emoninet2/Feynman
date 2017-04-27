@@ -71,9 +71,9 @@ NRF24L01p::RadioConfig_t RadioConfig;
 NRF24L01p::RxPipeConfig_t RxPipeConfig[6];
 
 void NRF24L01p_RadioReset(){
-    RadioConfig.DataReadyInterruptEnabled = 0;
-    RadioConfig.DataSentInterruptFlagEnabled = 0;
-    RadioConfig.MaxRetryInterruptFlagEnabled = 0;
+    RadioConfig.DataReadyInterruptEnabled = 1;
+    RadioConfig.DataSentInterruptFlagEnabled = 1;
+    RadioConfig.MaxRetryInterruptFlagEnabled = 1;
     RadioConfig.Crc = NRF24L01p::CONFIG_CRC_16BIT;
     RadioConfig.AutoReTransmissionCount = 15;
     RadioConfig.AutoReTransmitDelayX250us = 15;
@@ -99,8 +99,8 @@ void NRF24L01p_RadioReset(){
         RxPipeConfig[i].autoAckEnabled = 1;
         RxPipeConfig[i].dynamicPayloadEnabled = 1;
     }
-        
-    Radio.ResetConfigValues(&RadioConfig, RxPipeConfig);
+    
+    Radio.Initialize(&RadioConfig, RxPipeConfig);
 }
 
 
@@ -148,11 +148,7 @@ void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *mes
 
 }
 
-void connlost(void *context, char *cause)
-{
-    printf("\nConnection lost\n");
-    printf("     cause: %s\n", cause);
-}
+
 
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
@@ -172,6 +168,37 @@ void delivered(void *context, MQTTClient_deliveryToken dt)
 {
     //printf("Message with token value %d delivery confirmed\n", dt);
     deliveredtoken = dt;
+}
+
+void connlost(void *context, char *cause)
+{
+    printf("\nConnection lost\n");
+    printf("     cause: %s\n", cause);
+    
+    myClient.cl = &connlost;
+    myClient.ma = &msgarrvd;
+    myClient.dc = &delivered;
+    
+    //MQTTClient client;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    MQTTClient_deliveryToken token;
+    int rc;
+
+    MQTTClient_create(&myClient.client, ADDRESS, CLIENTID,
+        MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+    
+    //MQTT setting callback handers
+    MQTTClient_setCallbacks(myClient.client, NULL, myClient.cl, myClient.ma, myClient.dc);
+    
+    
+    if ((rc = MQTTClient_connect(myClient.client, &conn_opts)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to connect, return code %d\n", rc);
+        exit(-1);
+    }
 }
 
 void *mqtt_thread(void *ptr){
@@ -228,7 +255,6 @@ void *mqtt_thread(void *ptr){
 
 
 void *nrf24l01p_thread(void *ptr){
-    printf("RX NODE\r\n");
     NRF24L01p_RadioReset();
 
     while(1){
