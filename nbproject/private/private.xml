@@ -6,14 +6,6 @@
     </data>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/main.cpp</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01pConfig.h</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01p.h</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/Examples/TxRx.cpp</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/port/NRF24L01pPortConfig.h</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01pDriver.h</file>
-            <file>rfs://pi@192.168.0.178:22/home/pi/NetBeansProjects/Feynman/NRF24L01p/NRF24L01p.cpp</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
