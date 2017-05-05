@@ -37,7 +37,7 @@
 
 
 
-#define ADDRESS     "tcp://localhost:1883"
+#define ADDRESS     "tcp://m12.cloudmqtt.com:19910"
 #define CLIENTID    "Feynman"
 #define TOPIC       "Feynman"
 #define PAYLOAD     "Hello World!"
@@ -152,10 +152,10 @@ void process_mqtt_message(char *topicName, int topicLen, MQTTClient_message *mes
 
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
-    //char buffer[message->payloadlen];
-    //memcpy(buffer,message->payload, message->payloadlen);
-    //buffer[message->payloadlen] = '\0';
-    //printf("%s/%s\r\n", topicName, buffer);
+    char buffer[message->payloadlen];
+    memcpy(buffer,message->payload, message->payloadlen);
+    buffer[message->payloadlen] = '\0';
+    printf("%s/%s\r\n", topicName, buffer);
     
     process_mqtt_message(topicName, topicLen, message);
     
@@ -189,7 +189,8 @@ void connlost(void *context, char *cause)
         MQTTCLIENT_PERSISTENCE_NONE, NULL);
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession = 1;
-    
+    conn_opts.username = "rguqmsrn";
+    conn_opts.password =  "glhIS4DVq_7e";
     //MQTT setting callback handers
     MQTTClient_setCallbacks(myClient.client, NULL, myClient.cl, myClient.ma, myClient.dc);
     
@@ -207,6 +208,8 @@ void *mqtt_thread(void *ptr){
     myClient.ma = &msgarrvd;
     myClient.dc = &delivered;
     
+    
+    
     //MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
@@ -217,6 +220,10 @@ void *mqtt_thread(void *ptr){
         MQTTCLIENT_PERSISTENCE_NONE, NULL);
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession = 1;
+    
+    conn_opts.username = "rguqmsrn";
+    conn_opts.password =  "glhIS4DVq_7e";
+    
     
     //MQTT setting callback handers
     MQTTClient_setCallbacks(myClient.client, NULL, myClient.cl, myClient.ma, myClient.dc);
